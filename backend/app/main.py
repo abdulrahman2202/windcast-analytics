@@ -26,7 +26,7 @@ app.add_middleware(
 )
 
 BASE_URL = "https://data.elexon.co.uk/bmrs/api/v1"
-FUELHH_URL = f"{BASE_URL}/datasets/FUELHH/stream"
+FUELHH_URL = f"{BASE_URL}/datasets/FUELHH"
 WINDFOR_URL = f"{BASE_URL}/datasets/WINDFOR/stream"
 
 
@@ -38,6 +38,7 @@ def root():
 @app.get("/api/health")
 def health():
     return {"status": "healthy"}
+
 
 
 async def fetch_json(
@@ -58,6 +59,40 @@ async def fetch_json(
     return payload
 
 
+
+async def fetch_actuals_in_chunks(
+    client: httpx.AsyncClient,
+    start_date: date,
+    end_date: date,
+) -> list[dict]:
+    records = []
+    current = start_date
+
+    while current <= end_date:
+        chunk_end = min(
+            current + pd.Timedelta(days=6),
+            end_date,
+        )
+        chunk_end = pd.Timestamp(chunk_end).date()
+
+        chunk = await fetch_json(
+            client,
+            FUELHH_URL,
+            {
+                "settlementDateFrom": current.isoformat(),
+                "settlementDateTo": chunk_end.isoformat(),
+                "fuelType": "WIND",
+            },
+        )
+
+        records.extend(chunk)
+        current = chunk_end + pd.Timedelta(days=1)
+
+    return records
+
+
+
+
 @app.get("/api/forecast")
 async def get_forecast(
     start_date: date = Query(default=date(2026, 1, 1)),
@@ -74,13 +109,10 @@ async def get_forecast(
 
     try:
         async with httpx.AsyncClient(timeout=45.0) as client:
-            actuals = await fetch_json(
+            actuals = await fetch_actuals_in_chunks(
                 client,
-                FUELHH_URL,
-                {
-                    "from": start,
-                    "to": end,
-                },
+                start_date,
+                end_date,
             )
 
             forecasts = await fetch_json(
@@ -201,8 +233,12 @@ async def get_forecast(
 
     except httpx.HTTPStatusError as exc:
         raise HTTPException(
-            502,
-            f"Elexon API returned HTTP {exc.response.status_code}",
+            status_code=502,
+            detail={
+                "url": str(exc.request.url),
+                "status": exc.response.status_code,
+                "response": exc.response.text[:1500],
+            },
         ) from exc
     except (httpx.HTTPError, ValueError, KeyError) as exc:
         raise HTTPException(

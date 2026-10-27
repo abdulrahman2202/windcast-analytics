@@ -1,4 +1,9 @@
+uvicorn app.main:app --reload --port 8000
+
 .venv/
 venv/
 __pycache__/
 *.py[cod]
+
+# env files (can opt-in for committing if needed)
+.env*
