@@ -106,6 +106,9 @@ async def get_forecast(
 
     start = f"{start_date.isoformat()}T00:00:00Z"
     end = f"{end_date.isoformat()}T23:59:59Z"
+    end_exclusive = pd.Timestamp(
+        f"{end_date.isoformat()}T00:00:00Z"
+    ) + pd.Timedelta(days=1)
 
     try:
         async with httpx.AsyncClient(timeout=45.0) as client:
@@ -161,9 +164,7 @@ async def get_forecast(
 
         actual_df = actual_df[
             (actual_df["startTime"] >= start)
-            & (actual_df["startTime"] < (
-                pd.Timestamp(end) + pd.Timedelta(seconds=1)
-            ))
+            & (actual_df["startTime"] < end_exclusive)
         ]
 
         # Use a day-ahead cutoff in UTC for this initial implementation.
@@ -185,9 +186,7 @@ async def get_forecast(
 
         forecast_df = forecast_df[
             (forecast_df["startTime"] >= start)
-            & (forecast_df["startTime"] < (
-                pd.Timestamp(end) + pd.Timedelta(days=1)
-            ))
+            & (forecast_df["startTime"] < end_exclusive)
             & (
                 forecast_df["publishTime"]
                 <= forecast_df["decision_cutoff"]
