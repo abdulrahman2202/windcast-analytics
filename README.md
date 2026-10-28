@@ -393,3 +393,15 @@ windcast-analytics/
 ```
 
 Local-only or generated directories such as `backend/venv`, `frontend/node_modules`, and `frontend/.next` are intentionally omitted from the tree. `frontend/.env.local` provides the local API URL; it is not copied into the frontend image by the Dockerfile, so Docker builds use the Compose build argument instead.
+
+---
+
+## Author
+
+**Abdul Rahman**
+Full Stack Developer | AI Engineering Enthusiast
+
+- GitHub: [https://github.com/abdulrahman2202](https://github.com/abdulrahman2202)
+- LinkedIn: [https://www.linkedin.com/in/abdul-rahman-001b34279/](https://www.linkedin.com/in/abdul-rahman-001b34279/)
+
+Developed WindCast Analytics as a full-stack technical project using Next.js, FastAPI, Python, and Docker to analyze UK wind generation forecast performance against actual generation.
