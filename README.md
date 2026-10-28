@@ -340,18 +340,6 @@ The current backend does not read any environment variables. Its base URL, datas
 
 ---
 
-## AI tools used
-
-AI assistance was used during development and documentation. Specifically, the AI assistant (`opencode`) helped with:
-
-- correcting the backend date-boundary filtering for inclusive start and full-day end handling;
-- creating the backend and frontend Dockerfiles and the root `docker-compose.yml`;
-- drafting and structuring this README.
-
-The AI did not produce live metrics, deployment URLs, credentials, or verified operational results. All application behavior, data interpretation, market conventions, and procurement assumptions should be independently reviewed and validated by the project author before use.
-
----
-
 ## Future improvements
 
 - Validate the day-ahead publication cutoff, timezone convention, and interval alignment against authoritative Elexon/BSC rules.
